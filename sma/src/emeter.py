@@ -76,8 +76,16 @@ class emeterPacket:
         self.storeU32BE(self._pMeterTime, timeStampMs)
         self._length = self.INITIAL_PAYLOAD_LENGTH
 
-        # Add dummy values for measurements to make sure the package always contains these. Solves tripower inverters not recognizing the data as valid.
-        # Totals
+        # Pre-fill all OBIS entries with 0 in the EXACT order specified by the SMA EMETER protocol.
+        # Order matches RalfOGit/sma-emeter-simulator and the official SMA EMETER spec.
+        # This ensures the packet structure is always complete and valid for Tripower inverters.
+        # Use updateMeasurementValue()/updateCounterValue() to overwrite values in-place.
+
+        # --- Totals (active FIRST, then reactive, apparent, PF) ---
+        self.addMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER, 0)
+        self.addCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY, 0)
+        self.addMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER, 0)
+        self.addCounterValue(emeterPacket.SMA_NEGATIVE_ACTIVE_ENERGY, 0)
         self.addMeasurementValue(emeterPacket.SMA_POSITIVE_REACTIVE_POWER, 0)
         self.addCounterValue(emeterPacket.SMA_POSITIVE_REACTIVE_ENERGY, 0)
         self.addMeasurementValue(emeterPacket.SMA_NEGATIVE_REACTIVE_POWER, 0)
@@ -88,7 +96,7 @@ class emeterPacket:
         self.addCounterValue(emeterPacket.SMA_NEGATIVE_APPARENT_ENERGY, 0)
         self.addMeasurementValue(emeterPacket.SMA_POWER_FACTOR, 0)
 
-        #L1
+        # --- L1 ---
         self.addMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER_L1, 0)
         self.addCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY_L1, 0)
         self.addMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER_L1, 0)
@@ -103,9 +111,9 @@ class emeterPacket:
         self.addCounterValue(emeterPacket.SMA_NEGATIVE_APPARENT_ENERGY_L1, 0)
         self.addMeasurementValue(emeterPacket.SMA_CURRENT_L1, 0)
         self.addMeasurementValue(emeterPacket.SMA_VOLTAGE_L1, 0)
-        self.addMeasurementValue(emeterPacket.SMA_POWER_FACTOR_L1, 0) 
+        self.addMeasurementValue(emeterPacket.SMA_POWER_FACTOR_L1, 0)
 
-        #L2
+        # --- L2 ---
         self.addMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER_L2, 0)
         self.addCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY_L2, 0)
         self.addMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER_L2, 0)
@@ -122,7 +130,7 @@ class emeterPacket:
         self.addMeasurementValue(emeterPacket.SMA_VOLTAGE_L2, 0)
         self.addMeasurementValue(emeterPacket.SMA_POWER_FACTOR_L2, 0)
 
-        #L3
+        # --- L3 ---
         self.addMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER_L3, 0)
         self.addCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY_L3, 0)
         self.addMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER_L3, 0)
