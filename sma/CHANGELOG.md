@@ -2,7 +2,7 @@
 ## 0.1.5-L123
 - Added per-phase L1/L2/L3 power reporting via MQTT fields powerInL1/L2/L3 and powerOutL1/L2/L3
 - Fixed duplicate OBIS entries for phase values
-- 
+  
 ## 0.1.4
 
 - patch for tripower inverters
@@ -56,4 +56,5 @@
 ## 0.0.1
 
 - Initial release
+
 
