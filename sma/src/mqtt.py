@@ -94,15 +94,15 @@ def on_message(client, userdata, msg):
             if power_in_key in data or power_out_key in data:
                 power_in  = data.get(power_in_key,  0) or 0
                 power_out = data.get(power_out_key, 0) or 0
-                packet.addMeasurementValue(obis_pos_power, round(power_in  * 10))
-                packet.addMeasurementValue(obis_neg_power, round(power_out * 10))
+                packet.updateMeasurementValue(obis_pos_power, round(power_in  * 10))
+                packet.updateMeasurementValue(obis_neg_power, round(power_out * 10))
                 logging.debug(f"Phase {phase}: powerIn={power_in}W, powerOut={power_out}W")
 
             if energy_in_key in data or energy_out_key in data:
                 energy_in  = data.get(energy_in_key,  0) or 0
                 energy_out = data.get(energy_out_key, 0) or 0
-                packet.addCounterValue(obis_pos_energy, round(energy_in  * 1000 * 3600))
-                packet.addCounterValue(obis_neg_energy, round(energy_out * 1000 * 3600))
+                packet.updateCounterValue(obis_pos_energy, round(energy_in  * 1000 * 3600))
+                packet.updateCounterValue(obis_neg_energy, round(energy_out * 1000 * 3600))
                 logging.debug(f"Phase {phase}: energyIn={energy_in}kWh, energyOut={energy_out}kWh")
 
         packet.end()
