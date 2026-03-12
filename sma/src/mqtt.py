@@ -54,11 +54,11 @@ def on_message(client, userdata, msg):
         packet = emeterPacket(int(serial_number))
         packet.begin(int(time.time() * 1000))
 
-        # --- Totals ---
-        packet.addMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER, round(data['powerIn'] * 10))
-        packet.addCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY, round(data['energyIn'] * 1000 * 3600))
-        packet.addMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER, round(data['powerOut'] * 10))
-        packet.addCounterValue(emeterPacket.SMA_NEGATIVE_ACTIVE_ENERGY, round(data['energyOut'] * 1000 * 3600))
+        # --- Totals (update in-place, begin() pre-filled them at correct position) ---
+        packet.updateMeasurementValue(emeterPacket.SMA_POSITIVE_ACTIVE_POWER, round(data['powerIn'] * 10))
+        packet.updateCounterValue(emeterPacket.SMA_POSITIVE_ACTIVE_ENERGY, round(data['energyIn'] * 1000 * 3600))
+        packet.updateMeasurementValue(emeterPacket.SMA_NEGATIVE_ACTIVE_POWER, round(data['powerOut'] * 10))
+        packet.updateCounterValue(emeterPacket.SMA_NEGATIVE_ACTIVE_ENERGY, round(data['energyOut'] * 1000 * 3600))
 
         # --- Per-phase power (L1/L2/L3) ---
         # Optional fields: powerInL1/L2/L3, powerOutL1/L2/L3, energyInL1/L2/L3, energyOutL1/L2/L3
