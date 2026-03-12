@@ -17,15 +17,32 @@ The add-on will subscribe to the following mqtt topic: `sma/emeter/<NUMERIC_METE
 
 ```json
 {
-  "powerIn": 125.5, // power consumption in W
-  "powerOut": 80.3, // power production in W
-  "energyIn": 5000.603, // consumed energy in kWh
-  "energyOut": 2000.707, // produced energy in Kwh
+  "powerIn": 125.5,       // total power consumption in W (required)
+  "powerOut": 80.3,       // total power production in W (required)
+  "energyIn": 5000.603,   // total consumed energy in kWh (required)
+  "energyOut": 2000.707,  // total produced energy in kWh (required)
+
+  "powerInL1": 50.0,      // per-phase power consumption L1 in W (optional)
+  "powerInL2": 40.0,      // per-phase power consumption L2 in W (optional)
+  "powerInL3": 35.5,      // per-phase power consumption L3 in W (optional)
+  "powerOutL1": 30.0,     // per-phase power production L1 in W (optional)
+  "powerOutL2": 25.0,     // per-phase power production L2 in W (optional)
+  "powerOutL3": 25.3,     // per-phase power production L3 in W (optional)
+
+  "energyInL1": 1600.0,   // per-phase consumed energy L1 in kWh (optional)
+  "energyInL2": 1700.0,   // per-phase consumed energy L2 in kWh (optional)
+  "energyInL3": 1700.603, // per-phase consumed energy L3 in kWh (optional)
+  "energyOutL1": 650.0,   // per-phase produced energy L1 in kWh (optional)
+  "energyOutL2": 675.0,   // per-phase produced energy L2 in kWh (optional)
+  "energyOutL3": 675.707, // per-phase produced energy L3 in kWh (optional)
+
   "destinationAddresses": [
-    "192.168.1.34" // ip-address(es) to send the packets to. This should be the ip of the inverter. If you leave this emtpy then multicast will be used. (multicast is not confirmed to work yet)
+    "192.168.1.34" // ip-address(es) to send the packets to. Should be the ip of the inverter. Leave empty to use multicast.
   ]
 }
 ```
+
+Per-phase fields (`L1`/`L2`/`L3`) are **optional**. If omitted, phase values are reported as 0 in the UDP packet. The total fields (`powerIn`, `powerOut`, `energyIn`, `energyOut`) are always required.
 
 ## How to use with HomeWizard meters
 
@@ -44,13 +61,21 @@ service: mqtt.publish
 data:
   payload_template: |-
     {
-      "powerIn": {{states('sensor.power_consumed_from_grid')}},
-      "powerOut": {{states('sensor.power_returned_to_grid')}},
-      "energyIn": {{states('sensor.energy_grid_consumed_helper')}},
-      "energyOut": {{states('sensor.energy_grid_returned_helper')}},
+      "powerIn": {{states('sensor.power_consumed_from_grid') | float}},
+      "powerOut": {{states('sensor.power_returned_to_grid') | float}},
+      "energyIn": {{states('sensor.energy_grid_consumed_helper') | float}},
+      "energyOut": {{states('sensor.energy_grid_returned_helper') | float}},
+      "powerInL1": {{states('sensor.power_consumed_from_grid_l1') | float(0)}},
+      "powerInL2": {{states('sensor.power_consumed_from_grid_l2') | float(0)}},
+      "powerInL3": {{states('sensor.power_consumed_from_grid_l3') | float(0)}},
+      "powerOutL1": {{states('sensor.power_returned_to_grid_l1') | float(0)}},
+      "powerOutL2": {{states('sensor.power_returned_to_grid_l2') | float(0)}},
+      "powerOutL3": {{states('sensor.power_returned_to_grid_l3') | float(0)}},
       "destinationAddresses": [
           "192.168.1.34"
         ]
     }
   topic: sma/emeter/1/state
 ```
+
+> **Note**: The `| float(0)` filter ensures missing sensors default to 0. Remove the per-phase lines if your meter does not provide phase-level data.
