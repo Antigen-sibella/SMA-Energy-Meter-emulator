@@ -149,6 +149,35 @@ class emeterPacket:
         self._pPacketPos = self.storeU64BE(self._pPacketPos, value)
         self._length += 12
 
+    def _findObisOffset(self, id):
+        """Find the byte offset of an OBIS id already written into the packet buffer."""
+        id_b = [(id >> 24) & 0xFF, (id >> 16) & 0xFF, (id >> 8) & 0xFF, id & 0xFF]
+        for i in range(self._headerLength, self._pPacketPos - 3):
+            if (self.meterPacket[i]     == id_b[0] and
+                self.meterPacket[i + 1] == id_b[1] and
+                self.meterPacket[i + 2] == id_b[2] and
+                self.meterPacket[i + 3] == id_b[3]):
+                return i
+        return None
+
+    def updateMeasurementValue(self, id, value):
+        """Overwrite an existing measurement value (4-byte) in-place.
+        Falls back to addMeasurementValue if the id is not yet in the buffer."""
+        offset = self._findObisOffset(id)
+        if offset is not None:
+            self.storeU32BE(offset + 4, value)
+        else:
+            self.addMeasurementValue(id, value)
+
+    def updateCounterValue(self, id, value):
+        """Overwrite an existing counter value (8-byte) in-place.
+        Falls back to addCounterValue if the id is not yet in the buffer."""
+        offset = self._findObisOffset(id)
+        if offset is not None:
+            self.storeU64BE(offset + 4, value)
+        else:
+            self.addCounterValue(id, value)
+
     def end(self):
         self._pPacketPos = self.storeU32BE(self._pPacketPos, self.SMA_VERSION)
         self._pPacketPos = self.storeU32BE(self._pPacketPos, 0x01020452)
@@ -207,4 +236,3 @@ class emeterPacket:
 
         pSerNo = self.offsetOf(self.meterPacket, DSRC, self._headerLength)
         self.storeU32BE(pSerNo, serNo)
-
